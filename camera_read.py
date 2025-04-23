@@ -1,7 +1,8 @@
 import cv2
 
 # Open the default camera (usually camera 0)
-cam = cv2.VideoCapture(0)
+cam = cv2.VideoCapture(2) # This is the index of the Iphone's camera, specific for Member2's Iphone, If you are testing with different Cameras, chaneg the index
+
 
 # Check if the camera opened successfully
 if not cam.isOpened():
