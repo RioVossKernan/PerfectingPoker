@@ -1,0 +1,40 @@
+self.architecture = [        
+                tf.keras.layers.InputLayer((300, 300, 3)),
+                data_augmentation,
+                             
+                tf.keras.layers.Conv2D(32, (3, 3)),       # Conv + ReLU
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.ReLU(),
+                tf.keras.layers.MaxPooling2D((2, 2)),
+
+                tf.keras.layers.Dropout(0.3),
+                tf.keras.layers.Conv2D(64, (3, 3)),       # Conv + ReLU
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.ReLU(),
+                tf.keras.layers.MaxPooling2D((2, 2)),
+
+                tf.keras.layers.Dropout(0.3),
+                tf.keras.layers.Conv2D(128, (3, 3)),       # Conv + ReLU
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.ReLU(),
+                tf.keras.layers.MaxPooling2D((2, 2)),
+                
+                tf.keras.layers.Dropout(0.3),
+                tf.keras.layers.Conv2D(256, (3, 3)),       # Conv + ReLU
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.ReLU(),
+                tf.keras.layers.MaxPooling2D((2, 2)),
+                
+                tf.keras.layers.Dropout(0.3),
+                tf.keras.layers.Conv2D(512, (3, 3)),       # Conv + ReLU
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.ReLU(),
+                tf.keras.layers.MaxPooling2D((2, 2)),
+
+                tf.keras.layers.Flatten(),                                   # Flatten to vector
+                
+                tf.keras.layers.Dense(256, activation='relu'),               # Fully connected layer
+                tf.keras.layers.Dropout(0.5),                                # Prevent overfitting
+                tf.keras.layers.Dense(52, activation='softmax')
+                ]
+        
