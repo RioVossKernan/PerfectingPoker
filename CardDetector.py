@@ -36,6 +36,10 @@ train_suits = Cards.load_suits( path + '/Card_Imgs/')
 
 cam_quit = 0 # Loop control variable
 
+last_poker_cards = []
+last_probs = []
+last_stats = []
+
 # Begin capturing frames
 while cam_quit == 0:
 
