@@ -5,7 +5,7 @@ import os
 import Cards
 import VideoStream
 
-
+import hand_reader
 ### ---- INITIALIZATION ---- ###
 # Define constants and initialize variables
 
@@ -69,6 +69,20 @@ while cam_quit == 0:
 
                 # Find the best rank and suit match for the card.
                 cards[k].best_rank_match,cards[k].best_suit_match,cards[k].rank_diff,cards[k].suit_diff = Cards.match_card(cards[k],train_ranks,train_suits)
+                poker_cards = hand_reader.convert_detected_cards_to_poker_cards(cards)
+    
+                if poker_cards:
+                    last_poker_cards = poker_cards
+                    last_stats = hand_reader.get_hand_stats(poker_cards)
+                    if 1 <= len(poker_cards) <= 5:
+                        last_probs = hand_reader.estimate_hand_probabilities(poker_cards, simulations=200)
+                
+                card_text = f"Detected Cards: {' '.join(str(card) for card in last_poker_cards)}"
+                cv2.putText(image, card_text, (10, 50), font, 0.6, (0, 0, 255), 2, cv2.LINE_AA)
+                if last_probs:
+                    prob_text = f"Probabilities: {', '.join(f'{hand}: {prob:.2%}' for hand, prob in last_probs.items())}"
+                    cv2.putText(image, prob_text, (10, 100), font, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
+            
 
                 # Draw center point and match result on the image.
                 image = Cards.draw_results(image, cards[k])
