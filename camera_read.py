@@ -28,21 +28,50 @@ rank_model.load_weights("rank_model_ckpt.keras")
 
 # ----------------------------------------------------------------------
 
-def center_crop_and_resize(image, target_size=(300, 300)):
-    h, w = image.shape[:2]
-    
-    # Find the shorter dimension and crop to a centered square
-    min_dim = min(h, w)
-    start_x = (w - min_dim) // 2
-    start_y = (h - min_dim) // 2
-    cropped = image[start_y:start_y + min_dim, start_x:start_x + min_dim]
-
-    # Resize to the target size (e.g., 300x300)
-    resized = cv2.resize(cropped, target_size, interpolation=cv2.INTER_AREA)
-    return resized
-
 ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
 suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
+
+def crop_and_warp(card_contour, original):
+    '''crop the background off and warp the card into a perfect rectangle'''
+    
+    # turn the contour to polygon
+    peri = cv2.arcLength(card_contour, True)
+    tolerance = 0.02 * peri   # how big of gaps in our contour do we allow (2% of the perimeter)
+    approx_poly = cv2.approxPolyDP(card_contour, tolerance, True)
+
+    # if more than 4 corners, something is wrong
+    assert len(approx_poly) == 4, "The detected contour has more than 4 corners."
+    pts = approx_poly.reshape(4, 2) # reshape to 4 (x,y) pairs
+
+    # get corners
+    yx_sum = pts.sum(axis=1)
+    yx_diff = np.diff(pts, axis=1)
+    tl = pts[np.argmin(yx_sum)] # tl because min x+y
+    br = pts[np.argmax(yx_sum)] # br because max x+y
+    tr = pts[np.argmin(yx_diff)] # tr because min y-x
+    bl = pts[np.argmax(yx_diff)] # bl because max y-x
+    warped_rect = np.array([tl, tr, br, bl], dtype="float32")
+
+    # Compute width and height of new image
+    # euclidean distance between points
+    w = int(np.linalg.norm(br - bl)) 
+    h = int(np.linalg.norm(tr - br))
+
+    # Destination points for the target rectangle
+    target_rect = np.array([
+        [0, 0],
+        [w - 1, 0],
+        [w - 1, h - 1],
+        [0, h - 1]
+    ], dtype="float32")
+
+    # Compute the perspective transform matrix and apply it
+    transform = cv2.getPerspectiveTransform(warped_rect, target_rect)
+    warped = cv2.warpPerspective(original, transform, (w, h))
+    #cv2.imwrite("warped.png", warped)
+
+    return warped
+
 
 # ----------------------------------------------------------------------
 
