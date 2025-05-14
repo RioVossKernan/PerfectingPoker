@@ -8,25 +8,17 @@ import nbimporter
 import tensorflow as tf
 from cropped_img_model import CardModel, crop_and_warp
 from hand_reader import PokerCard
-
-
+import matplotlib.pyplot as plt
 import hand_reader
-### ---- INITIALIZATION ---- ###
+
 
 ## Define font to use
 font = cv2.FONT_HERSHEY_SIMPLEX
 
-# Initialize camera object and video feed from the camera. The video stream is set up
-# as a seperate thread that constantly grabs frames from the camera feed. 
-# See VideoStream.py for VideoStream class definition
+# ------------------ LOAD VIDEO STREAM -----------------------
 vid_src = 1 # 0 for built-in camera, 1 for external camera
 videostream = VideoStream.VideoStream(vid_src).start()
-time.sleep(1) # Give the camera time to warm up
-
-# Load the train rank and suit images
-# path = os.path.dirname(os.path.abspath(__file__))
-# train_ranks = Cards.load_ranks( path + '/Card_Imgs/')
-# train_suits = Cards.load_suits( path + '/Card_Imgs/')
+time.sleep(1) 
 
 # ------------------ LOAD MODELS -----------------------
 
@@ -76,7 +68,10 @@ def crop_and_warp(card_contour, original):
     approx_poly = cv2.approxPolyDP(card_contour, tolerance, True)
 
     # if more than 4 corners, something is wrong
-    assert len(approx_poly) == 4, "The detected contour has more than 4 corners."
+    if len(approx_poly) < 4:
+        plt.imshow(original)
+        plt.show()
+        raise ValueError("The detected contour has less than 4 corners.")
     pts = approx_poly.reshape(4, 2) # reshape to 4 (x,y) pairs
 
     # get corners
@@ -157,11 +152,6 @@ while cam_quit == 0:
         for i in range(len(cnts_sort)):
             if (cnt_is_card[i] == 1):
 
-                # Create a card object from the contour and append it to the list of cards.
-                # preprocess_card function takes the card contour and contour and
-                # determines the cards properties (corner points, etc). It generates a
-                # flattened 200x300 image of the card, and isolates the card's
-                # suit and rank from the image.
                 rank_img, suit_img, center = preprocess_frame(cnts_sort[i], image)
                 rank_img = np.expand_dims(rank_img, axis=0)
                 suit_img = np.expand_dims(suit_img, axis=0)
@@ -173,41 +163,26 @@ while cam_quit == 0:
                 suit_name = suits[suit_n]
                 rank_name = ranks[rank_n]
                 
+                # Poker card is used for simulations
                 poker_card = PokerCard(rank_name, suit_name)
                 poker_cards.append(poker_card)
                 
+                # Query card is used for drawinf
                 query_card = Cards.Query_card()
                 query_card.best_rank_match = rank_name
                 query_card.best_suit_match = suit_name
                 query_card.center = center
                 cards.append(query_card)
-                
-                #cards[k].best_rank_match,cards[k].best_suit_match,cards[k].rank_diff,cards[k].suit_diff = Cards.match_card(cards[k],train_ranks,train_suits)
-                
-                #poker_cards = hand_reader.convert_detected_cards_to_poker_cards(cards)
-    
-                
 
                 # Draw center point and match result on the image.
                 image = Cards.draw_results(image, cards[k])
                 k = k + 1
-	    
-        # Draw card contours on image (have to do contours all at once or
-        # they do not show up properly for some reason)
-        if (len(cards) != 0):
-            temp_cnts = []
-            for i in range(len(cards)):
-                temp_cnts.append(cards[i].contour)
-            #cv2.drawContours(image,temp_cnts, -1, (255,0,0), 2)
         
-
         if 1 <= len(poker_cards) <= 5:
             last_poker_cards = poker_cards
-            # last_stats = hand_reader.get_hand_stats(poker_cards)
             last_probs = hand_reader.estimate_hand_probabilities(poker_cards, simulations=200)
         else:
             last_poker_cards = poker_cards
-            # last_stats = hand_reader.get_hand_stats(poker_cards)
             last_probs = {}
         card_text = f"Detected Cards: {' '.join(str(card) for card in last_poker_cards)}"
         cv2.putText(image, card_text, (10, 50), font, 0.6, (0, 0, 255), 2, cv2.LINE_AA)
@@ -226,7 +201,6 @@ while cam_quit == 0:
     # Finally, display the image with the identified cards!
     cv2.imshow("Card Detector",image)
 
-    
     # Poll the keyboard. If 'q' is pressed, exit the main loop.
     key = cv2.waitKey(1) & 0xFF
     if key == ord("q"):
