@@ -12,13 +12,6 @@ from hand_reader import PokerCard
 
 import hand_reader
 ### ---- INITIALIZATION ---- ###
-# Define constants and initialize variables
-
-## Camera settings
-IM_WIDTH = 1280
-IM_HEIGHT = 720
-FRAME_RATE = 10
-
 
 ## Define font to use
 font = cv2.FONT_HERSHEY_SIMPLEX
@@ -26,7 +19,8 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 # Initialize camera object and video feed from the camera. The video stream is set up
 # as a seperate thread that constantly grabs frames from the camera feed. 
 # See VideoStream.py for VideoStream class definition
-videostream = VideoStream.VideoStream((IM_WIDTH, IM_HEIGHT), FRAME_RATE, 1).start()
+vid_src = 1 # 0 for built-in camera, 1 for external camera
+videostream = VideoStream.VideoStream(vid_src).start()
 time.sleep(1) # Give the camera time to warm up
 
 # Load the train rank and suit images

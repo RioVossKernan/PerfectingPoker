@@ -4,11 +4,9 @@ import cv2
 
 class VideoStream:
     """Camera object"""
-    def __init__(self, resolution=(640,480),framerate=30,src=0):
+    def __init__(self, src=0):
 
         self.stream = cv2.VideoCapture(src)
-        ret = self.stream.set(3,resolution[0])
-        ret = self.stream.set(4,resolution[1])
         (self.grabbed, self.frame) = self.stream.read()
         self.stopped = False
 
