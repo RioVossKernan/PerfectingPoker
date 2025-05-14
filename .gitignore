@@ -4,3 +4,5 @@ data/*
 *.xml
 *.png
 *.jpeg
+
+*.pyc
