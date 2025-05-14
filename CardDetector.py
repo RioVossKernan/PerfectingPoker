@@ -209,11 +209,11 @@ while cam_quit == 0:
 
         if 1 <= len(poker_cards) <= 5:
             last_poker_cards = poker_cards
-            last_stats = hand_reader.get_hand_stats(poker_cards)
+            # last_stats = hand_reader.get_hand_stats(poker_cards)
             last_probs = hand_reader.estimate_hand_probabilities(poker_cards, simulations=200)
         else:
             last_poker_cards = poker_cards
-            last_stats = hand_reader.get_hand_stats(poker_cards)
+            # last_stats = hand_reader.get_hand_stats(poker_cards)
             last_probs = {}
         card_text = f"Detected Cards: {' '.join(str(card) for card in last_poker_cards)}"
         cv2.putText(image, card_text, (10, 50), font, 0.6, (0, 0, 255), 2, cv2.LINE_AA)
@@ -223,7 +223,7 @@ while cam_quit == 0:
             cv2.putText(image, "Probabilities:", (10, y_offset), font, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
             y_offset += 30  
             
-            for hand, prob in last_probs.items():
+            for hand, prob in sorted(last_probs.items()):
                 text = f"{hand}: {prob:.2%}"
                 cv2.putText(image, text, (30, y_offset), font, 0.6, (0, 255, 0), 2, cv2.LINE_AA)
                 y_offset += 30

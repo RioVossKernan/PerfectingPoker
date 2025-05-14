@@ -81,7 +81,7 @@ def get_hand_stats(PokerCards):
         'three_of_a_kind': 3 in counts and counts.count(2) < 1,  
         'two_pair': counts.count(2) >= 2,
         'one_pair': counts.count(2) == 1 and 3 not in counts,  
-        'high_PokerCard': max(counts) == 1  
+        'high_card': max(counts) == 1  
     }
 
 def estimate_hand_probabilities(current_hand, total_PokerCards=7, simulations=10000):
@@ -96,7 +96,7 @@ def estimate_hand_probabilities(current_hand, total_PokerCards=7, simulations=10
         
         hand_types = ['royal_flush', 'straight_flush', 'four_of_a_kind', 
                      'full_house', 'flush', 'straight', 'three_of_a_kind', 
-                     'two_pair', 'one_pair', 'high_PokerCard']
+                     'two_pair', 'one_pair', 'high_card']
         
         for hand_type in hand_types:
             if stats[hand_type]:
@@ -104,6 +104,11 @@ def estimate_hand_probabilities(current_hand, total_PokerCards=7, simulations=10
                 break
     
     probabilities = {hand: results[hand] / simulations for hand in results}
+    
+    for hand in hand_types:
+        if hand not in probabilities:
+            probabilities[hand] = 0.0
+    
     return probabilities
 
 
